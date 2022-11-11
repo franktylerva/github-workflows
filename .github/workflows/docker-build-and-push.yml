@@ -16,9 +16,7 @@ on:
       platforms:
         required: false
         type: string
-        default: "linux/amd64"
-
-    secrets: inherit
+        default: "linux/amd64,linux/arm64"
 
 jobs:
   buildAndPublishImage:
