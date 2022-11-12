@@ -25,6 +25,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            name/app
+            ghcr.io/username/app
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       
@@ -42,19 +60,21 @@ jobs:
           password: ${{ secrets.DOCKER_SECRET }}
         
       - name: Build and push
+        id: buildandpush
         uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.context }}
           platforms: ${{ inputs.platforms }}
-          push: true
-          tags: ${{ inputs.image-tags }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Update Helm tags
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "tfrank773/feature-a:1.1.2"' -i helm/values.yaml
+          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "${{steps.buildandpush.outputs.digest}}"' -i helm/values.yaml
 
       - name: Check code in and push
         uses: EndBug/add-and-commit@v8
