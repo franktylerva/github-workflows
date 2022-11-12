@@ -57,7 +57,9 @@ jobs:
           cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "feature-a:1.1.1"' -i helm/values.yaml
 
       - name: Check code in and push
-        run: |
-          git add helm/values.yaml
-          git commit -m 'Updated helm/values.yaml file.'
-          git push
+        uses: EndBug/add-and-commit@v8
+        with:
+          author_name: franktylerva
+          author_email: franktylerva@gmail.com
+          message: 'Updated helm/values.yaml file.'
+          add: 'helm/values.yaml'
