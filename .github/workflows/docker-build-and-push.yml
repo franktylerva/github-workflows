@@ -58,7 +58,7 @@ jobs:
           password: ${{ secrets.DOCKER_SECRET }}
         
       - name: Build and push
-        id: buildandpush
+        id: build
         uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.context }}
