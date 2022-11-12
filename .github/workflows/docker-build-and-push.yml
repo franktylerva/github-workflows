@@ -9,9 +9,18 @@ on:
         required: false
         type: string
         default: .
-      image-base-name:
+      repository-name:
+        required: false
+        type: string
+        default: tfrank773 
+      image-name:
         required: true
         type: string
+      manifest:
+        required: false
+        type: string
+        default: helm/values.yaml
+
       platforms:
         required: false
         type: string
@@ -29,7 +38,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           # list of Docker images to use as base name for tags
-          images: ${{ inputs.image-base-name }}
+          images: ${{ inputs.repository-name }}/${{ inputs.image-name }}
 
           # generate Docker tags based on the following events/attributes
           tags: |
@@ -78,7 +87,7 @@ jobs:
       - name: Update Helm tags
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "${{ steps.firsttag.outputs.tag }}"' -i helm/values.yaml
+          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "{{ inputs.image-name }}")).image = "${{ steps.firsttag.outputs.tag }}"' -i ${{ inputs.manifest }}
 
       - name: Check code in and push
         uses: EndBug/add-and-commit@v8
@@ -86,4 +95,4 @@ jobs:
           author_name: franktylerva
           author_email: franktylerva@gmail.com
           message: 'Updated helm/values.yaml file.'
-          add: 'helm/values.yaml'
+          add: '${{ inputs.manifest }}'
