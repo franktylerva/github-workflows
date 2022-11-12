@@ -41,14 +41,13 @@ jobs:
           images: ${{ inputs.repository-name }}/${{ inputs.image-name }}
 
           # generate Docker tags based on the following events/attributes
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
+          #  type=schedule
+          #  type=ref,event=branch
+          #  type=ref,event=pr
+          #  type=semver,pattern={{version}}
+          #  type=semver,pattern={{major}}.{{minor}}
+          #  type=semver,pattern={{major}}
+          tags: type=sha
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -87,7 +86,7 @@ jobs:
       - name: Update Helm tags
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "{{ inputs.image-name }}")).image = "${{ steps.firsttag.outputs.tag }}"' -i ${{ inputs.manifest }}
+          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "${{ inputs.image-name }}")).image = "${{ steps.firsttag.outputs.tag }}"' -i ${{ inputs.manifest }}
 
       - name: Check code in and push
         uses: EndBug/add-and-commit@v8
