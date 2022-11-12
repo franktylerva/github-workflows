@@ -9,10 +9,9 @@ on:
         required: false
         type: string
         default: .
-      image-tags:
-        required: false
+      image-base-name:
+        required: true
         type: string
-        default: latest
       platforms:
         required: false
         type: string
@@ -30,9 +29,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           # list of Docker images to use as base name for tags
-          images: |
-            name/app
-            ghcr.io/username/app
+          images: ${{ inputs.image-base-name }}
+
           # generate Docker tags based on the following events/attributes
           tags: |
             type=schedule
@@ -74,7 +72,7 @@ jobs:
       - name: Update Helm tags
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "${{steps.buildandpush.outputs.digest}}"' -i helm/values.yaml
+          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "${{steps.build.outputs.digest}}"' -i helm/values.yaml
 
       - name: Check code in and push
         uses: EndBug/add-and-commit@v8
