@@ -69,13 +69,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: environment
-        run: env
+      - name: Get first Tag
+        id: firsttag
+        run: |
+          tags=($(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n'))
+          echo "tag=${tags[0]}" >> $GITHUB_OUTPUT
 
       - name: Update Helm tags
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "${{ steps.meta.outputs.tags }}"' -i helm/values.yaml
+          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "${{ steps.firsttag.outputs.tag }}"' -i helm/values.yaml
 
       - name: Check code in and push
         uses: EndBug/add-and-commit@v8
