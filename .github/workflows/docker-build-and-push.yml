@@ -54,7 +54,7 @@ jobs:
       - name: Update Helm tags
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "feature-a:1.1.1"' -i helm/values.yaml
+          cmd: yq eval '(.features[] | select(has("name")) | select(.name == "feature-a")).image = "tfrank773/feature-a:1.1.1"' -i helm/values.yaml
 
       - name: Check code in and push
         uses: EndBug/add-and-commit@v8
